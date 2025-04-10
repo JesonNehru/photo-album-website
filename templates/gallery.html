@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Photo Gallery</title>
+</head>
+<body>
+    <h2>Photo Gallery</h2>
+
+    {% for photo in photos %}
+        <img src="{{ url_for('static', filename='uploads/' + photo) }}" alt="{{ photo }}" width="200">
+        {% if is_admin %}
+            <form action="{{ url_for('delete', filename=photo) }}" method="POST">
+                <button type="submit">Delete</button>
+            </form>
+        {% endif %}
+    {% endfor %}
+
+    <br><br>
+    <a href="{{ url_for('index') }}">Back to Upload</a>
+</body>
+</html>
