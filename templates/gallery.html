@@ -3,20 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <title>Photo Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .photo-card {
+            margin: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 220px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        }
+        img {
+            width: 200px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        form {
+            display: inline;
+        }
+        .nav {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
     <h2>Photo Gallery</h2>
 
-    {% for photo in photos %}
-        <img src="{{ url_for('static', filename='uploads/' + photo) }}" alt="{{ photo }}" width="200">
-        {% if is_admin %}
+    <div class="gallery">
+        {% for photo in photos %}
+        <div class="photo-card">
+            <img src="{{ url_for('static', filename='uploads/' + photo) }}" alt="{{ photo }}">
+            {% if is_admin %}
             <form action="{{ url_for('delete', filename=photo) }}" method="POST">
                 <button type="submit">Delete</button>
             </form>
-        {% endif %}
-    {% endfor %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
 
-    <br><br>
-    <a href="{{ url_for('index') }}">Back to Upload</a>
+    <div class="nav">
+        <a href="{{ url_for('index') }}">Back to Home</a> |
+        {% if is_admin %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </div>
 </body>
 </html>

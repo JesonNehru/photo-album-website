@@ -1,22 +1,28 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Photo Album</title>
 </head>
 <body>
-    <h1>Welcome to the Photo Album</h1>
-    
-    <!-- Link to go to Gallery -->
-    <a href="{{ url_for('gallery') }}">Go to Gallery</a>
+    <h1>Welcome to the Photo Album!</h1>
 
-    <h2>Upload Photo</h2>
-    <!-- Form to upload photo -->
-    <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
-        <input type="file" name="photo" required>
-        <button type="submit">Upload</button>
-    </form>
+    <!-- Navigation Links -->
+    <a href="{{ url_for('gallery') }}">Go to Gallery</a> |
+    {% if session.get('is_admin') %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}">Admin Login</a>
+    {% endif %}
+
+    {% if session.get('is_admin') %}
+        <h2>Upload Photo</h2>
+        <!-- Upload form only visible to admin -->
+        <form action="{{ url_for('upload') }}" method="POST" enctype="multipart/form-data">
+            <input type="file" name="photo" required>
+            <button type="submit">Upload</button>
+        </form>
+    {% endif %}
 
 </body>
 </html>
-

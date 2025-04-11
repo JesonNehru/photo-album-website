@@ -1,16 +1,25 @@
 from flask import Flask, render_template, request, redirect, url_for, session
+from werkzeug.utils import secure_filename
 import os
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # Needed for session
 
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Allowed image extensions
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 # Fake user database (for testing)
 USERS = {
     'admin': 'admin123'  # username: password
 }
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -18,6 +27,7 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    error = None
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -25,9 +35,8 @@ def login():
             session['is_admin'] = True
             return redirect(url_for('gallery'))
         else:
-            return "Invalid credentials", 403
-    return render_template('login.html')
-
+            error = "Invalid credentials"
+    return render_template('login.html', error=error)
 @app.route('/logout')
 def logout():
     session.clear()
@@ -43,10 +52,19 @@ def gallery():
 def upload():
     if not session.get('is_admin'):
         return "Unauthorized", 403
+    if 'photo' not in request.files:
+        return "No file part", 400
     file = request.files['photo']
-    if file:
-        file.save(os.path.join(UPLOAD_FOLDER, file.filename))
-    return redirect(url_for('gallery'))
+    if file.filename == '':
+        return "No selected file", 400
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        ext = filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"{uuid.uuid4().hex}.{ext}"  # Optional for uniqueness
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
+        return redirect(url_for('gallery'))
+    else:
+        return "Invalid file type", 400
 
 @app.route('/delete/<filename>', methods=['POST'])
 def delete(filename):
@@ -58,4 +76,4 @@ def delete(filename):
     return redirect(url_for('gallery'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=80)
